@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+    margin-top: 50px;
+}
+
+button {
+    display: block;
+    width: 200px;
+    height: 50px;
+    margin: 20px auto;
+    background-color: #35b5e5;
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    line-height: 50px;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+#video, #canvas {
+    display: block;
+    width: 80%;
+    margin: 20px auto;
+    border: 1px solid #ccc;
+}
+
+#filters {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.filter {
+    margin: 0 10px;
+    cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<h1>Camera Access</h1>
+
+<div id="filters">
+    <button class="filter" data-filter="grayscale(100%)">Grayscale</button>
+    <button class="filter" data-filter="sepia(100%)">Sepia</button>
+    <button class="filter" data-filter="invert(100%)">Invert</button>
+    <button class="filter" data-filter="blur(5px)">Blur</button>
+    <button class="filter" data-filter="none">None</button>
+</div>
+
+<div id="filters">
+<button id="download">Download Photo</button>
+<button id="capture">Capture Photo</button>
+<button id="clear">Clear Canvas</button>
+</div>
+
+<video id="video" width="640" height="480" autoplay></video>
+<canvas id="canvas" width="640" height="480"></canvas>
+
+<script>
+// Grab elements, create settings, etc.
+var video = document.getElementById('video');
+var canvas = document.getElementById('canvas');
+var context = canvas.getContext('2d');
+var captureButton = document.getElementById('capture');
+var downloadButton = document.getElementById('download');
+var clearButton = document.getElementById('clear');
+var filters = document.querySelectorAll('.filter');
+
+// Get access to the camera!
+if(navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({ video: true }).then(function(stream) {
+        video.srcObject = stream;
+        video.play();
+    }); 
+}
+
+// Apply filter to video
+filters.forEach(function(filter) {
+    filter.addEventListener('click', function() {
+        video.style.filter = this.dataset.filter;
+    });
+});
+
+// Trigger photo take
+captureButton.addEventListener("click", function() {
+    context.filter = video.style.filter;
+    context.drawImage(video, 0, 0, 640, 480);
+});
+
+// Download the captured photo
+downloadButton.addEventListener("click", function() {
+    var link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = 'photo.png';
+    link.click();
+});
+
+// Clear the canvas
+clearButton.addEventListener("click", function() {
+    context.clearRect(0, 0, canvas.width, canvas.height);
+});
+</script>
+
+</body>
+</html>
